@@ -43,9 +43,9 @@ jobs:
       with:
         name: clang11-virtualroot.tar.gz
         path: /tmp/virtualroot.tar.gz
-    # - name: test
-    #   run: make check-clang -j2 ||true
-    #   working-directory: llvm-project/build
+    - name: test
+      run: make check-clang -j2 ||true
+      working-directory: llvm-project/build
 
   build-clang11-static:
     runs-on: ubuntu-latest
@@ -79,9 +79,9 @@ jobs:
       with:
         name: clang11-static-virtualroot.tar.gz
         path: /tmp/virtualroot.tar.gz
-    # - name: test
-    #   run: make check-clang -j2 ||true
-    #   working-directory: llvm-project/build
+    - name: test
+      run: make check-clang -j2 ||true
+      working-directory: llvm-project/build
 
   release:
     runs-on: ubuntu-18.04
