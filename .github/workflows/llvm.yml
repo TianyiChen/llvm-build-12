@@ -11,11 +11,11 @@ env:
   TARGET_SHA: ${{ github.event.issue.title }}
 jobs:
 
-  build-clang11:
+  build-clang12:
     runs-on: ubuntu-latest
     env:
-      CC: clang-11 -w
-      CXX: clang++-11 -w
+      CC: clang-12 -w
+      CXX: clang++-12 -w
     steps:
     - name: clone
       run: |
@@ -26,7 +26,7 @@ jobs:
        mkdir build
        git checkout $TARGET_SHA
     - name: install
-      run: wget https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && sudo ./llvm.sh 11
+      run: wget https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && sudo ./llvm.sh 12
     - name: configure, make
       run: |
         cmake -DLLVM_ENABLE_PROJECTS="clang;compiler-rt;lld" -DCMAKE_BUILD_TYPE=Release -DLLVM_TARGETS_TO_BUILD=X86 -G "Unix Makefiles" ../llvm
@@ -41,17 +41,17 @@ jobs:
         tar -czf /tmp/virtualroot.tar.gz virtualroot
     - uses: actions/upload-artifact@v2
       with:
-        name: clang11-virtualroot.tar.gz
+        name: clang12-virtualroot.tar.gz
         path: /tmp/virtualroot.tar.gz
     - name: test
       run: make check-clang -j2 ||true
       working-directory: llvm-project/build
 
-  build-clang11-static:
+  build-clang12-static:
     runs-on: ubuntu-latest
     env:
-      CC: clang-11 -w -static-libgcc
-      CXX: clang++-11 -w -static-libstdc++ -static-libgcc
+      CC: clang-12 -w -static-libgcc
+      CXX: clang++-12 -w -static-libstdc++ -static-libgcc
     steps:
     - name: clone
       run: |
@@ -62,7 +62,7 @@ jobs:
        mkdir build
        git checkout $TARGET_SHA
     - name: install
-      run: wget https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && sudo ./llvm.sh 11
+      run: wget https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && sudo ./llvm.sh 12
     - name: configure, make
       run: |
         cmake -DLLVM_ENABLE_PROJECTS="clang;compiler-rt" -DCMAKE_BUILD_TYPE=Release -DLLVM_TARGETS_TO_BUILD=X86 -G "Unix Makefiles" ../llvm
@@ -77,7 +77,7 @@ jobs:
         tar -czf /tmp/virtualroot.tar.gz virtualroot
     - uses: actions/upload-artifact@v2
       with:
-        name: clang11-static-virtualroot.tar.gz
+        name: clang12-static-virtualroot.tar.gz
         path: /tmp/virtualroot.tar.gz
     - name: test
       run: make check-clang -j2 ||true
@@ -85,7 +85,7 @@ jobs:
 
   release:
     runs-on: ubuntu-18.04
-    needs: [build-clang11,build-clang11-static]
+    needs: [build-clang12,build-clang12-static]
     if: always()
     steps:
       - name: Init
@@ -100,7 +100,7 @@ jobs:
         id: commit
         run: echo "::set-output name=commit::$(echo ${TARGET_SHA} | cut -c1-8)"
       - name: ls
-        run: ls -l clang11-virtualroot.tar.gz
+        run: ls -l clang12-virtualroot.tar.gz
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -119,8 +119,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: clang11-virtualroot.tar.gz/virtualroot.tar.gz
-          asset_name: clang11-virtualroot.tar.gz
+          asset_path: clang12-virtualroot.tar.gz/virtualroot.tar.gz
+          asset_name: clang12-virtualroot.tar.gz
           asset_content_type: application/gzip
       - name: Upload to release
         if: always()
@@ -129,8 +129,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: clang11-static-virtualroot.tar.gz/virtualroot.tar.gz
-          asset_name: clang11-static-virtualroot.tar.gz
+          asset_path: clang12-static-virtualroot.tar.gz/virtualroot.tar.gz
+          asset_name: clang12-static-virtualroot.tar.gz
           asset_content_type: application/gzip
  
       - name: Close Issue
